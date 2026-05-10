@@ -18,21 +18,32 @@ import CategoryCard from '../../components/home/CategoryCard';
 import ProductCard from '../../components/product/ProductCard';
 import { useHomeViewModel } from '../../../viewmodels/home/useHomeViewModel';
 import { useCartStore } from '../../../store/cartStore';
+import { Snackbar } from 'react-native-snackbar';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
-  const { search, setSearch, categories, popularProducts } = useHomeViewModel();
+  const {
+    search,
+    setSearch,
+    categories,
+    popularProducts,
+    loadingProducts,
+    errorProducts,
+    reloadPopularProducts,
+  } = useHomeViewModel();
   const addToCart = useCartStore(state => state.addToCart);
+  const items = useCartStore(state => state.items);
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <AppHeader
-          title="Sabor Express"
+          title="Señor Chaufero"
           subtitle="Entrega en 30 min"
-          rightText="Carrito"
-          onPressRight={() => navigation.navigate('Products')}
+          rightText={totalItems > 0 ? `🛒 ${totalItems}` : '🛒'}
+          onPressRight={() => navigation.navigate('Cart')}
         />
 
         <SearchBar
@@ -71,7 +82,17 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.viewAll}>Ver todo</Text>
           </TouchableOpacity>
         </View>
+        {loadingProducts ? (
+          <Text style={styles.stateText}>Cargando populares...</Text>
+        ) : null}
 
+        {errorProducts ? (
+          <TouchableOpacity onPress={reloadPopularProducts}>
+            <Text style={styles.errorText}>
+              {errorProducts}. Toca para reintentar.
+            </Text>
+          </TouchableOpacity>
+        ) : null}
         <FlatList
           data={popularProducts}
           keyExtractor={item => item.id}
@@ -81,8 +102,22 @@ export default function HomeScreen({ navigation }: Props) {
           renderItem={({ item }) => (
             <ProductCard
               product={item}
-              onPress={() => navigation.navigate('Products')}
-              onAdd={() => addToCart(item)}
+              onPress={() =>
+                navigation.navigate('ProductDetail', { productId: item.id })
+              }
+              onAdd={() => {
+                addToCart(item);
+
+                Snackbar.show({
+                  text: `${item.name} agregado al carrito`,
+                  duration: Snackbar.LENGTH_SHORT,
+                  action: {
+                    text: 'VER',
+                    textColor: '#FFFFFF',
+                    onPress: () => navigation.navigate('Cart'),
+                  },
+                });
+              }}
             />
           )}
         />
@@ -162,5 +197,18 @@ const styles = StyleSheet.create({
   },
   row: {
     justifyContent: 'space-between',
+  },
+  stateText: {
+    marginBottom: SPACING.md,
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
+  errorText: {
+    marginBottom: SPACING.md,
+    color: COLORS.danger,
+    fontSize: 14,
+    fontWeight: '800',
   },
 });

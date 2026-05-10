@@ -4,7 +4,11 @@ import { Product, ProductExtra } from '../models/product/Product';
 
 interface CartStore {
   items: CartItem[];
-  addToCart: (product: Product, extras?: ProductExtra[]) => void;
+  addToCart: (
+    product: Product,
+    extras?: ProductExtra[],
+    quantity?: number,
+  ) => void;
   removeFromCart: (cartItemId: string) => void;
   increaseQuantity: (cartItemId: string) => void;
   decreaseQuantity: (cartItemId: string) => void;
@@ -17,7 +21,7 @@ interface CartStore {
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
 
-  addToCart: (product, extras = []) =>
+  addToCart: (product, extras = [], quantity = 1) =>
     set(state => {
       const existingItem = state.items.find(
         item =>
@@ -29,19 +33,21 @@ export const useCartStore = create<CartStore>((set, get) => ({
         return {
           items: state.items.map(item =>
             item.id === existingItem.id
-              ? { ...item, quantity: item.quantity + 1 }
+              ? { ...item, quantity: item.quantity + quantity }
               : item,
           ),
         };
       }
 
+      const unitPrice =
+        product.price + extras.reduce((sum, extra) => sum + extra.price, 0);
+
       const newItem: CartItem = {
         id: `${product.id}-${Date.now()}`,
         productId: product.id,
         name: product.name,
-        price:
-          product.price + extras.reduce((sum, extra) => sum + extra.price, 0),
-        quantity: 1,
+        price: unitPrice,
+        quantity,
         image: product.image,
         deliveryTime: product.deliveryTime,
         extras,

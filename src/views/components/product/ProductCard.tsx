@@ -36,8 +36,12 @@ export default function ProductCard({
         <View style={styles.footer}>
           <Text style={styles.price}>S/ {product.price.toFixed(2)}</Text>
 
-          <TouchableOpacity style={styles.addButton} onPress={onAdd}>
-            <Text style={styles.addButtonText}>+</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={onAdd}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.addButtonText}>🛒 +</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -105,17 +109,18 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   addButton: {
-    width: 34,
+    minWidth: 58,
     height: 34,
     borderRadius: 17,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 10,
   },
+
   addButtonText: {
     color: COLORS.white,
-    fontSize: 22,
-    fontWeight: '700',
-    marginTop: -2,
+    fontSize: 13,
+    fontWeight: '900',
   },
 });

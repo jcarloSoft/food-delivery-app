@@ -7,7 +7,7 @@ import {
   TouchableOpacityProps,
 } from 'react-native';
 import { COLORS } from '../../../core/theme/colors';
-import { RADIUS, SPACING } from '../../../core/theme/spacing';
+import { RADIUS } from '../../../core/theme/spacing';
 
 interface AppButtonProps extends TouchableOpacityProps {
   title: string;
